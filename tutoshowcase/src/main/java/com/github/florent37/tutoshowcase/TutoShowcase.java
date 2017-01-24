@@ -11,6 +11,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.databinding.DataBindingUtil;
+import android.databinding.ViewDataBinding;
 import android.graphics.Rect;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IdRes;
@@ -76,6 +78,15 @@ public final class TutoShowcase {
         return this;
     }
 
+    public TutoShowcase setContentView(@LayoutRes int content, boolean bindView) {
+        if (!bindView) {
+            return setContentView(content);
+        }
+        ViewDataBinding binding = DataBindingUtil.inflate(LayoutInflater.from(tutoView.getContext()), content, container, false);
+        container.addView(binding.getRoot(), ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        return this;
+    }
+
     public void dismiss() {
         ViewCompat.animate(container)
                 .alpha(0f)
@@ -127,6 +138,25 @@ public final class TutoShowcase {
                 dismiss();
             }
         });
+        return this;
+    }
+
+    public TutoShowcase show(boolean dismissOnTap) {
+        container.setVisibility(View.VISIBLE);
+        ViewCompat.animate(container)
+                .alpha(1f)
+                .setDuration(container.getResources().getInteger(android.R.integer.config_longAnimTime))
+                .start();
+        if (dismissOnTap) {
+            container.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dismiss();
+                }
+            });
+        } else {
+            container.setClickable(true);
+        }
         return this;
     }
 
@@ -193,6 +223,10 @@ public final class TutoShowcase {
 
         public TutoShowcase show() {
             return tutoShowcase.show();
+        }
+
+        public TutoShowcase show(boolean dismissOnTap) {
+            return tutoShowcase.show(dismissOnTap);
         }
 
         private void displaySwipable(final boolean left) {
@@ -292,12 +326,13 @@ public final class TutoShowcase {
                     ViewCompat.setTranslationY(hand, y);
                     ViewCompat.setTranslationX(hand, x);
 
-                    if (settings.animated)
+                    if (settings.animated) {
                         ViewCompat.animate(hand)
                                 .translationY(y + height * 0.8f - getStatusBarHeight())
                                 .setStartDelay(settings.delay != null ? settings.delay : 500)
                                 .setDuration(settings.duration != null ? settings.duration : 600)
                                 .setInterpolator(new DecelerateInterpolator());
+                    }
 
                     hand.getViewTreeObserver().removeOnPreDrawListener(this);
                     return false;
@@ -428,6 +463,10 @@ public final class TutoShowcase {
             return viewActions.show();
         }
 
+        public TutoShowcase show(boolean dismissOnTap) {
+            return viewActions.show(dismissOnTap);
+        }
+
         public TutoShowcase showOnce(String key) {
             return viewActions.showOnce(key);
         }
@@ -458,12 +497,12 @@ public final class TutoShowcase {
             super(viewActions);
         }
 
-        public ActionViewActionsEditor delayed(int delay){
+        public ActionViewActionsEditor delayed(int delay) {
             this.viewActions.settings.delay = delay;
             return this;
         }
 
-        public ActionViewActionsEditor duration(int duration){
+        public ActionViewActionsEditor duration(int duration) {
             this.viewActions.settings.duration = duration;
             return this;
         }
