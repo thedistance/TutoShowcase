@@ -42,6 +42,7 @@ public final class TutoShowcase {
     private FrameLayout container;
     private TutoView tutoView;
     private SharedPreferences sharedPreferences;
+    private int[] margins;
 
     private TutoShowcase(@NonNull Activity activity) {
         this.sharedPreferences = activity.getSharedPreferences(SHARED_TUTO, Context.MODE_PRIVATE);
@@ -67,6 +68,11 @@ public final class TutoShowcase {
         return new TutoShowcase(activity);
     }
 
+    public TutoShowcase setContentMargins(int[] margins) {
+        this.margins = margins;
+        return this;
+    }
+
     public TutoShowcase setBackgroundColor(@ColorInt int color) {
         tutoView.setBackgroundOverlayColor(color);
         return this;
@@ -74,7 +80,14 @@ public final class TutoShowcase {
 
     public TutoShowcase setContentView(@LayoutRes int content) {
         View child = LayoutInflater.from(tutoView.getContext()).inflate(content, container, false);
-        container.addView(child, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        if (margins != null) {
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            params.setMargins(margins[0], margins[1], margins[2], margins[3]);
+            container.addView(child, params);
+        } else {
+            container.addView(child, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
         return this;
     }
 
@@ -83,7 +96,13 @@ public final class TutoShowcase {
             return setContentView(content);
         }
         ViewDataBinding binding = DataBindingUtil.inflate(LayoutInflater.from(tutoView.getContext()), content, container, false);
-        container.addView(binding.getRoot(), ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        if (margins != null) {
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            params.setMargins(margins[0], margins[1], margins[2], margins[3]);
+            container.addView(binding.getRoot(), params);
+        } else {
+            container.addView(binding.getRoot(), ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
         return this;
     }
 
